@@ -9,7 +9,7 @@ st.title("🏠 부동산 수익 계산기")
 if 'room_count_old' not in st.session_state:
     st.session_state.room_count_old = 1
 
-# [건물 구매 금액] - format="%,d"를 사용해 천 단위 쉼표 강제
+# [건물 구매 금액]
 building_price = st.number_input("건물 구매 금액 (원)", min_value=0, step=1000000, format="%d")
 st.caption(f"💰 입력된 금액: **{building_price:,}** 원")
 
@@ -28,11 +28,10 @@ st.subheader("💰 월세 입력")
 col_bulk1, col_bulk2 = st.columns([3, 1])
 
 with col_bulk1:
-    # 여기서 입력하는 값도 쉼표가 보이게 설정
     bulk_rent = st.number_input("일괄 적용할 월세 금액 (원)", min_value=0, step=10000, format="%d")
 
 with col_bulk2:
-    st.write(" ") # 레이아웃 정렬용
+    st.write(" ") 
     if st.button("모든 가구에 적용", use_container_width=True):
         for i in range(room_count):
             st.session_state[f"room_{i}"] = bulk_rent
@@ -43,12 +42,10 @@ monthly_rents = []
 cols = st.columns(2)
 
 for i in range(room_count):
-    # 세션 상태에 값이 없으면 0으로 초기화
     if f"room_{i}" not in st.session_state:
         st.session_state[f"room_{i}"] = 0
         
     with cols[i % 2]:
-        # format="%d"를 통해 입력창에 쉼표 표시
         rent = st.number_input(
             f"{i+1}호실 월세 (원)", 
             min_value=0, 
@@ -67,12 +64,24 @@ if st.button("계산하기", type="primary", use_container_width=True):
     annual_total_maintenance = monthly_maintenance * 12
     final_annual_profit = annual_total_rent - annual_total_maintenance
     
-    st.success("✅ 연간 수익 계산 완료")
+    # --- 수익률 계산 (반올림하여 소수점 한 자리까지) ---
+    roi = 0
+    if building_price > 0:
+        # round(값, 1)을 통해 소수점 둘째 자리에서 반올림하여 첫째 자리까지 표기
+        roi = round((final_annual_profit / building_price) * 100, 1)
     
-    # 메트릭 결과값에도 쉼표 표시 (:,)
+    st.success("✅ 분석 완료")
+    
+    # 결과 표시
     c1, c2, c3 = st.columns(3)
-    c1.metric("월세 합계 (1달)", f"{total_monthly_rent:,} 원")
+    c1.metric("연간 총 월세", f"{annual_total_rent:,} 원")
     c2.metric("연간 총 관리비", f"- {annual_total_maintenance:,} 원")
-    c3.metric("최종 연간 수익", f"{final_annual_profit:,} 원")
+    # 요청하신 대로 문구 변경: "약 연간 수익률"
+    c3.metric("약 연간 수익률", f"{roi:.1f} %")
     
-    st.info(f"💡 연간 총 월세 {annual_total_rent:,}원에서 연간 총 관리비 {annual_total_maintenance:,}원을 제외한 순수익입니다.")
+    st.divider()
+    
+    # 최종 요약
+    st.subheader(f"📊 최종 연 순수익: {final_annual_profit:,} 원")
+    # 소수점 한 자리(.1f)로 표기
+    st.info(f"💡 {building_price:,}원에 건물을 구매하여 연간 {final_annual_profit:,}원을 벌 경우, 투자 금액 대비 **약 연간 {roi:.1f}%**의 수익이 발생합니다.")
