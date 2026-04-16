@@ -64,24 +64,21 @@ if st.button("계산하기", type="primary", use_container_width=True):
     annual_total_maintenance = monthly_maintenance * 12
     final_annual_profit = annual_total_rent - annual_total_maintenance
     
-    # --- 수익률 계산 (반올림하여 소수점 한 자리까지) ---
+    # --- 수익률 계산 ---
     roi = 0
     if building_price > 0:
-        # round(값, 1)을 통해 소수점 둘째 자리에서 반올림하여 첫째 자리까지 표기
         roi = round((final_annual_profit / building_price) * 100, 1)
     
     st.success("✅ 분석 완료")
     
-    # 결과 표시
+    # 결과 표시 (:, 을 사용하여 모든 숫자에 쉼표 추가)
     c1, c2, c3 = st.columns(3)
     c1.metric("연간 총 월세", f"{annual_total_rent:,} 원")
     c2.metric("연간 총 관리비", f"- {annual_total_maintenance:,} 원")
-    # 요청하신 대로 문구 변경: "약 연간 수익률"
     c3.metric("약 연간 수익률", f"{roi:.1f} %")
     
     st.divider()
     
-    # 최종 요약
+    # 최종 요약 (숫자 뒤에 :, 추가)
     st.subheader(f"📊 최종 연 순수익: {final_annual_profit:,} 원")
-    # 소수점 한 자리(.1f)로 표기
     st.info(f"💡 {building_price:,}원에 건물을 구매하여 연간 {final_annual_profit:,}원을 벌 경우, 투자 금액 대비 **약 연간 {roi:.1f}%**의 수익이 발생합니다.")
