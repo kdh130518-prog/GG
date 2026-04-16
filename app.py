@@ -37,41 +37,25 @@ with col_bulk2:
 room_count = st.number_input("건물에 있는 호실 수", min_value=1, max_value=100, value=st.session_state.room_count_old)
 st.session_state.room_count_old = room_count
 
-# --- 각 호실별 입력 칸 (배열 방식 수정) ---
+# --- 각 호실별 입력 칸 (모바일 순서 최적화) ---
 monthly_rents = []
 
-# 호실을 2개씩 짝지어서 한 줄(row)씩 생성합니다.
-for i in range(0, room_count, 2):
-    cols = st.columns(2) # 매 줄마다 새로운 2개의 컬럼 생성
-    
-    # 왼쪽 칸 (i번째 호실)
-    with cols[0]:
-        if f"room_{i}" not in st.session_state:
-            st.session_state[f"room_{i}"] = 0
-        rent = st.number_input(
-            f"{i+1}호실 월세 (원)", 
-            min_value=0, 
-            step=10000, 
-            key=f"room_{i}", 
-            format="%d" 
-        )
-        st.caption(f"└ **{rent:,}** 원")
-        monthly_rents.append(rent)
-    
-    # 오른쪽 칸 (i+1번째 호실) - 호실 수가 홀수일 때를 대비해 체크
-    if i + 1 < room_count:
-        with cols[1]:
-            if f"room_{i+1}" not in st.session_state:
-                st.session_state[f"room_{i+1}"] = 0
-            rent_next = st.number_input(
-                f"{i+2}호실 월세 (원)", 
-                min_value=0, 
-                step=10000, 
-                key=f"room_{i+1}", 
-                format="%d" 
-            )
-            st.caption(f"└ **{rent_next:,}** 원")
-            monthly_rents.append(rent_next)
+# 중요: 반복문 안에서 매번 columns를 생성하면 모바일에서도 1-2-3-4 순서가 유지됩니다.
+for i in range(room_count):
+    # 세션 상태 초기화
+    if f"room_{i}" not in st.session_state:
+        st.session_state[f"room_{i}"] = 0
+        
+    # 입력창 생성
+    rent = st.number_input(
+        f"{i+1}호실 월세 (원)", 
+        min_value=0, 
+        step=10000, 
+        key=f"room_{i}", 
+        format="%d" 
+    )
+    st.caption(f"└ **{rent:,}** 원")
+    monthly_rents.append(rent)
 
 st.divider()
 
